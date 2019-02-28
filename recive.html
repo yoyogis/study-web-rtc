@@ -10,6 +10,11 @@
 
 <body>
     <button onclick="connectOffer()">连接Offer</button>
+    <p>
+        <h4>接收端连接信息(复制接收端连接信息)：</h4>
+        <p id="connectionInfomation"></p>
+    </p>
+    <h4>接收到的消息：</h4>
     <p id="receiveBox"></p>
 </body>
 <script>
@@ -17,16 +22,19 @@
         let remoteConnection = new RTCPeerConnection();
         remoteConnection.ondatachannel = receiveChannelCallback;
         remoteConnection.onicecandidate = (e) => {
+            let connectionInfomationText = "";
             if (e.candidate) {
-                copy(JSON.stringify({
+                connectionInfomationText = JSON.stringify({
                     remoteCandidate: e.candidate.toJSON(),
                     remoteDescription: remoteConnection.localDescription
-                }));
+                });
             } else {
-                copy(JSON.stringify({
+                connectionInfomationText = JSON.stringify({
                     remoteDescription: remoteConnection.localDescription
-                }));
+                });
             }
+            copy(connectionInfomationText);
+            connectionInfomation.innerText = connectionInfomationText;
         }
 
         let token = JSON.parse(decodeURIComponent(getQueryParameter("token")));

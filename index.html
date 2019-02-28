@@ -13,14 +13,10 @@
     <button onclick="acceptAnswer()">接受Answer</button>
     <button onclick="sendMessage()">发送消息</button>
     <p>
-        <h4>local offer</h4>
-        <span id="localDescription"></span>
+        <h4>接收链接</h4>
+        <a id="reciveUrl" target="_blank" style=""></a>
     </p>
-    <p>
-        <h4>local candidate</h4>
-        <span id="localCandidate"></span>
-    </p>
-    remote Information:
+    接收端连接信息:
     <textarea name="" id="remoteInformation" cols="30" rows="10"></textarea>
 
     <textarea name="" id="messageInputBox" cols="30" rows="10"></textarea>
@@ -34,18 +30,23 @@
         sendChannel = localConnection.createDataChannel("sendChannel");
         localConnection.onicecandidate = (e) => {
             let prefix = location.href.replace("index.html","")+"recive.html";
+            let url = "";
             if (e.candidate) {
                 let token = JSON.stringify({
                     localCandidate: e.candidate.toJSON(),
                     localDescription: localConnection.localDescription.toJSON()
                 });
-                copy(`${prefix}?token=${encodeURIComponent(token)}`);
+                url = `${prefix}?token=${encodeURIComponent(token)}`;
             }else{
                 let token = JSON.stringify({
                     localDescription: localConnection.localDescription.toJSON()
                 });
-                copy(`${prefix}?token=${encodeURIComponent(token)}`);
+                url = `${prefix}?token=${encodeURIComponent(token)}`;
             }
+            copy(url);
+            reciveUrl.href = url;
+            reciveUrl.innerText = url;
+
         }
         localConnection.createOffer().then(offer => localConnection.setLocalDescription(offer));
     }
