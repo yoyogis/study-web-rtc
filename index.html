@@ -33,17 +33,18 @@
         localConnection = new RTCPeerConnection();
         sendChannel = localConnection.createDataChannel("sendChannel");
         localConnection.onicecandidate = (e) => {
+            let prefix = location.href.replace("index.html","")+"recive.html";
             if (e.candidate) {
                 let token = JSON.stringify({
                     localCandidate: e.candidate.toJSON(),
                     localDescription: localConnection.localDescription.toJSON()
                 });
-                copy(`${location.href.replace("index.html", "recive.html")}?token=${encodeURIComponent(token)}`);
+                copy(`${prefix}?token=${encodeURIComponent(token)}`);
             }else{
                 let token = JSON.stringify({
                     localDescription: localConnection.localDescription.toJSON()
                 });
-                copy(`${location.href.replace("index.html", "recive.html")}?token=${encodeURIComponent(token)}`);
+                copy(`${prefix}?token=${encodeURIComponent(token)}`);
             }
         }
         localConnection.createOffer().then(offer => localConnection.setLocalDescription(offer));
@@ -58,7 +59,7 @@
     }
 
     function handleAddCandidateError() {
-        console.error("handleAddCandidateError....");
+        console.error("handleAddCandidateError....")
 
     }
 
