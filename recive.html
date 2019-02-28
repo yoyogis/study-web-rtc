@@ -16,6 +16,8 @@
     </p>
     <h4>接收到的消息：</h4>
     <p id="receiveBox"></p>
+    <textarea name="" id="messageInputBox" cols="30" rows="10"></textarea>
+    <button onclick="sendMessage()">发送消息</button>
 </body>
 <script>
     function connectOffer() {
@@ -54,7 +56,7 @@
 
     function handleReceiveMessage(event) {
         var el = document.createElement("p");
-        var txtNode = document.createTextNode(event.data);
+        var txtNode = document.createTextNode("对方:"+event.data);
         el.appendChild(txtNode);
         receiveBox.appendChild(el);
     }
@@ -64,6 +66,17 @@
             console.log("Receive channel's status has changed to " +
                 receiveChannel.readyState);
         }
+    }
+
+    function sendMessage() {
+        var message = messageInputBox.value;
+        receiveChannel.send(message);
+        var el = document.createElement("p");
+        var txtNode = document.createTextNode("我:"+message);
+        el.appendChild(txtNode);
+        receiveBox.appendChild(el);
+        messageInputBox.value = "";
+        messageInputBox.focus();
     }
 
     function getQueryParameter(name) {

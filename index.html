@@ -11,15 +11,16 @@
 <body>
     <button onclick="generateUrl()">生成URL</button>
     <button onclick="acceptAnswer()">接受Answer</button>
-    <button onclick="sendMessage()">发送消息</button>
     <p>
         <h4>接收链接</h4>
         <a id="reciveUrl" target="_blank" style=""></a>
     </p>
     接收端连接信息:
     <textarea name="" id="remoteInformation" cols="30" rows="10"></textarea>
-
+    <h4>接收到的消息：</h4>
+    <p id="receiveBox"></p>
     <textarea name="" id="messageInputBox" cols="30" rows="10"></textarea>
+    <button onclick="sendMessage()">发送消息</button>
 </body>
 <script>
     var localConnection;
@@ -28,6 +29,7 @@
     function generateUrl() {
         localConnection = new RTCPeerConnection();
         sendChannel = localConnection.createDataChannel("sendChannel");
+        sendChannel.onmessage = handleReceiveMessage;
         localConnection.onicecandidate = (e) => {
             let prefix = location.href.replace("index.html","")+"recive.html";
             let url = "";
@@ -67,8 +69,20 @@
     function sendMessage() {
         var message = messageInputBox.value;
         sendChannel.send(message);
+        var el = document.createElement("p");
+        var txtNode = document.createTextNode("我:"+message);
+        el.appendChild(txtNode);
+        receiveBox.appendChild(el);
+
         messageInputBox.value = "";
         messageInputBox.focus();
+    }
+
+    function handleReceiveMessage(event) {
+        var el = document.createElement("p");
+        var txtNode = document.createTextNode("对方:"+event.data);
+        el.appendChild(txtNode);
+        receiveBox.appendChild(el);
     }
 
     function copy(text) {
