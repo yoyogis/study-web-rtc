@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Study WebRTC - Recive</title>
+</head>
+
+<body>
+    <button onclick="connectOffer()">连接Offer</button>
+    <p id="receiveBox"></p>
+</body>
+<script>
+    function connectOffer() {
+        let remoteConnection = new RTCPeerConnection();
+        remoteConnection.ondatachannel = receiveChannelCallback;
+        remoteConnection.onicecandidate = (e) => {
+            if (e.candidate) {
+                copy(JSON.stringify({
+                    remoteCandidate: e.candidate.toJSON(),
+                    remoteDescription: remoteConnection.localDescription
+                }));
+            } else {
+                copy(JSON.stringify({
+                    remoteDescription: remoteConnection.localDescription
+                }));
+            }
+        }
+
+        let token = JSON.parse(decodeURIComponent(getQueryParameter("token")));
+        remoteConnection.setRemoteDescription(token.localDescription).then(() => remoteConnection.createAnswer())
+            .then(answer => remoteConnection.setLocalDescription(answer))
+        if (token.localCandidate) {
+            remoteConnection.addIceCandidate(token.localCandidate);
+        }
+    }
+
+    function receiveChannelCallback(event) {
+        receiveChannel = event.channel;
+        receiveChannel.onmessage = handleReceiveMessage;
+        receiveChannel.onopen = handleReceiveChannelStatusChange;
+        receiveChannel.onclose = handleReceiveChannelStatusChange;
+    }
+
+    function handleReceiveMessage(event) {
+        var el = document.createElement("p");
+        var txtNode = document.createTextNode(event.data);
+        el.appendChild(txtNode);
+        receiveBox.appendChild(el);
+    }
+
+    function handleReceiveChannelStatusChange(event) {
+        if (receiveChannel) {
+            console.log("Receive channel's status has changed to " +
+                receiveChannel.readyState);
+        }
+    }
+
+    function getQueryParameter(name) {
+        let s = location.search.substring(1).split("&").map(v => v.split("=")).filter(v => v[0] == name)[0];
+        if (s) {
+            return s[1];
+        }
+    }
+
+    function copy(text) {
+        var oInput = document.createElement('input');
+        oInput.value = text;
+        document.body.appendChild(oInput);
+        oInput.select();//选择对象
+        document.execCommand('copy');//执行浏览器复制命令
+        document.body.removeChild(oInput);
+    }
+</script>
+
+</html>

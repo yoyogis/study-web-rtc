@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Study WebRTC</title>
+</head>
+
+<body>
+    <button onclick="generateUrl()">生成URL</button>
+    <button onclick="acceptAnswer()">接受Answer</button>
+    <button onclick="sendMessage()">发送消息</button>
+    <p>
+        <h4>local offer</h4>
+        <span id="localDescription"></span>
+    </p>
+    <p>
+        <h4>local candidate</h4>
+        <span id="localCandidate"></span>
+    </p>
+    remote Information:
+    <textarea name="" id="remoteInformation" cols="30" rows="10"></textarea>
+
+    <textarea name="" id="messageInputBox" cols="30" rows="10"></textarea>
+</body>
+<script>
+    var localConnection;
+    var sendChannel;
+    var localDescriptionObj;
+    function generateUrl() {
+        localConnection = new RTCPeerConnection();
+        sendChannel = localConnection.createDataChannel("sendChannel");
+        localConnection.onicecandidate = (e) => {
+            if (e.candidate) {
+                let token = JSON.stringify({
+                    localCandidate: e.candidate.toJSON(),
+                    localDescription: localConnection.localDescription.toJSON()
+                });
+                copy(`${location.href.replace("index.html", "recive.html")}?token=${encodeURIComponent(token)}`);
+            }else{
+                let token = JSON.stringify({
+                    localDescription: localConnection.localDescription.toJSON()
+                });
+                copy(`${location.href.replace("index.html", "recive.html")}?token=${encodeURIComponent(token)}`);
+            }
+        }
+        localConnection.createOffer().then(offer => localConnection.setLocalDescription(offer));
+    }
+
+    function acceptAnswer() {
+        let remoteInformationObj = JSON.parse(remoteInformation.value);
+        localConnection.setRemoteDescription(remoteInformationObj.remoteDescription);
+        if (remoteInformationObj.remoteCandidate) {
+            localConnection.addIceCandidate(remoteInformationObj.remoteCandidate);
+        }
+    }
+
+    function handleAddCandidateError() {
+        console.error("handleAddCandidateError....");
+
+    }
+
+    function sendMessage() {
+        var message = messageInputBox.value;
+        sendChannel.send(message);
+        messageInputBox.value = "";
+        messageInputBox.focus();
+    }
+
+    function copy(text) {
+        var oInput = document.createElement('input');
+        oInput.value = text;
+        document.body.appendChild(oInput);
+        oInput.select();//选择对象
+        document.execCommand('copy');//执行浏览器复制命令
+        document.body.removeChild(oInput);
+    }
+</script>
+
+</html>
